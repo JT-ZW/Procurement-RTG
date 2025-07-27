@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 import time
 
 from app.core.config import settings
-from app.api import auth, users, simple_data
+from app.api import auth, users, simple_data, products, suppliers, requisitions, units
 
 # Create FastAPI application
 app = FastAPI(
@@ -126,6 +126,12 @@ app.include_router(users.router, prefix="/users", tags=["Users"])
 
 # API v1 routes - simple data endpoints
 app.include_router(simple_data.router, prefix="/api/v1", tags=["Data API"])
+
+# API v1 routes - full CRUD endpoints
+app.include_router(products.router, prefix="/api/v1/products", tags=["Products"])
+app.include_router(suppliers.router, prefix="/api/v1/suppliers", tags=["Suppliers"])
+app.include_router(requisitions.router, prefix="/api/v1/requisitions", tags=["Requisitions"])
+app.include_router(units.router, prefix="/api/v1/units", tags=["Units"])
 
 # Additional API routes for frontend compatibility
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication (v1)"])

@@ -166,35 +166,116 @@
               <div class="row">
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label">Category</label>
+                    <label class="form-label">Code</label>
                     <input
                       type="text"
                       class="form-control"
-                      v-model="productForm.category"
-                      :class="{ 'is-invalid': errors.category }"
+                      v-model="productForm.code"
+                      :class="{ 'is-invalid': errors.code }"
                       required
                     >
-                    <div v-if="errors.category" class="invalid-feedback">
-                      {{ errors.category }}
+                    <div v-if="errors.code" class="invalid-feedback">
+                      {{ errors.code }}
                     </div>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label">Price</label>
+                    <label class="form-label">Unit of Measure</label>
+                    <select
+                      class="form-control"
+                      v-model="productForm.unit_of_measure"
+                      :class="{ 'is-invalid': errors.unit_of_measure }"
+                    >
+                      <option value="pieces">Pieces</option>
+                      <option value="kg">Kilograms</option>
+                      <option value="liters">Liters</option>
+                      <option value="boxes">Boxes</option>
+                      <option value="bottles">Bottles</option>
+                    </select>
+                    <div v-if="errors.unit_of_measure" class="invalid-feedback">
+                      {{ errors.unit_of_measure }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Category ID (Optional)</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="productForm.category_id"
+                      :class="{ 'is-invalid': errors.category_id }"
+                      placeholder="Enter category UUID"
+                    >
+                    <div v-if="errors.category_id" class="invalid-feedback">
+                      {{ errors.category_id }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Standard Cost</label>
                     <input
                       type="number"
                       step="0.01"
                       class="form-control"
-                      v-model="productForm.price"
-                      :class="{ 'is-invalid': errors.price }"
-                      required
+                      v-model="productForm.standard_cost"
+                      :class="{ 'is-invalid': errors.standard_cost }"
                     >
-                    <div v-if="errors.price" class="invalid-feedback">
-                      {{ errors.price }}
+                    <div v-if="errors.standard_cost" class="invalid-feedback">
+                      {{ errors.standard_cost }}
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label">Currency</label>
+                    <select
+                      class="form-control"
+                      v-model="productForm.currency"
+                    >
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="GBP">GBP</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label">Min Stock</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      v-model="productForm.minimum_stock_level"
+                    >
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label">Max Stock</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      v-model="productForm.maximum_stock_level"
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Reorder Point</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  v-model="productForm.reorder_point"
+                >
               </div>
 
               <div class="mb-3">
@@ -248,9 +329,15 @@ export default {
     const editingProduct = ref(null)
     const productForm = ref({
       name: '',
+      code: '',
       description: '',
-      category: '',
-      price: 0,
+      category_id: '',
+      unit_of_measure: 'pieces',
+      standard_cost: 0,
+      currency: 'USD',
+      minimum_stock_level: 0,
+      maximum_stock_level: 1000,
+      reorder_point: 10,
       is_active: true
     })
     const errors = ref({})
