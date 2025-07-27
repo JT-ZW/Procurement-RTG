@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Gateway Stream Procurement</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, var(--primary-color) 0%, #34495e 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .sidebar .logo {
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .sidebar .logo h4 {
+            color: white;
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .sidebar .nav-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar .nav-item {
+            margin: 0.25rem 0;
+        }
+        
+        .sidebar .nav-link {
+            color: #bdc3c7;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(52, 152, 219, 0.2);
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-card .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .stat-card.primary .stat-icon { background: var(--primary-color); }
+        .stat-card.secondary .stat-icon { background: var(--secondary-color); }
+        .stat-card.success .stat-icon { background: var(--success-color); }
+        .stat-card.warning .stat-icon { background: var(--warning-color); }
+        .stat-card.danger .stat-icon { background: var(--danger-color); }
+        
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0 0.25rem 0;
+        }
+        
+        .stat-card .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: 400px;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .unit-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h4><i class="fas fa-building"></i> Gateway Stream</h4>
+            <small class="text-muted">Procurement System</small>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-item">
+                <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#units" class="nav-link" data-page="units">
+                    <i class="fas fa-building"></i>
+                    Hotel Units
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#users" class="nav-link" data-page="users">
+                    <i class="fas fa-users"></i>
+                    User Management
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#products" class="nav-link" data-page="products">
+                    <i class="fas fa-box"></i>
+                    Products
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#suppliers" class="nav-link" data-page="suppliers">
+                    <i class="fas fa-truck"></i>
+                    Suppliers
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#reports" class="nav-link" data-page="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    Reports
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#settings" class="nav-link" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">Admin Dashboard</h2>
+                    <p class="text-muted mb-0">Welcome back! Here's what's happening with your procurement system.</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary me-2" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <div class="dropdown d-inline">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> Admin User
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle"></i> Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Content -->
+        <div id="dashboard-content">
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card primary">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="ms-3">
+                                <div class="stat-value" id="total-units">-</div>
+                                <div class="stat-label">Hotel Units</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card secondary">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="ms-3">
+                                <div class="stat-value" id="total-users">-</div>
+                                <div class="stat-label">Active Users</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card success">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="ms-3">
+                                <div class="stat-value" id="total-products">-</div>
+                                <div class="stat-label">Products</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card warning">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="ms-3">
+                                <div class="stat-value" id="total-suppliers">-</div>
+                                <div class="stat-label">Suppliers</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts and Tables -->
+            <div class="row">
+                <div class="col-md-8 mb-4">
+                    <div class="chart-container">
+                        <h5 class="mb-3">Unit Performance Overview</h5>
+                        <canvas id="unitsChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="chart-container">
+                        <h5 class="mb-3">User Distribution</h5>
+                        <canvas id="usersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-container">
+                        <h5 class="mb-3">Recent Activity</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Unit</th>
+                                        <th>Users</th>
+                                        <th>Products</th>
+                                        <th>Suppliers</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="units-table-body">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <div class="loading">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8000/api/v1';
+        let authToken = localStorage.getItem('authToken');
+        
+        // Chart instances
+        let unitsChart, usersChart;
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!authToken) {
+                // Redirect to login or show login modal
+                alert('Please login to access the admin dashboard');
+                return;
+            }
+            
+            initializeCharts();
+            loadDashboardData();
+            
+            // Setup navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update active state
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Load page content
+                    const page = this.dataset.page;
+                    loadPageContent(page);
+                });
+            });
+        });
+        
+        // API helper function
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const config = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                }
+            };
+            
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        logout();
+                        return null;
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                showError('API call failed: ' + error.message);
+                return null;
+            }
+        }
+        
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load system overview
+                const overview = await apiCall('/admin/dashboard/overview');
+                if (overview) {
+                    document.getElementById('total-units').textContent = overview.active_units;
+                    document.getElementById('total-users').textContent = overview.active_users;
+                    document.getElementById('total-products').textContent = overview.total_products;
+                    document.getElementById('total-suppliers').textContent = overview.total_suppliers;
+                }
+                
+                // Load dashboard stats
+                const stats = await apiCall('/admin/dashboard/stats');
+                if (stats) {
+                    updateUnitsTable(stats.units);
+                    updateUnitsChart(stats.units);
+                }
+                
+                // Load user stats
+                const userStats = await apiCall('/admin/users/stats');
+                if (userStats) {
+                    updateUsersChart(userStats);
+                }
+                
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+        
+        // Initialize charts
+        function initializeCharts() {
+            // Units chart
+            const unitsCtx = document.getElementById('unitsChart').getContext('2d');
+            unitsChart = new Chart(unitsCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Products',
+                            data: [],
+                            backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Suppliers',
+                            data: [],
+                            backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Users chart
+            const usersCtx = document.getElementById('usersChart').getContext('2d');
+            usersChart = new Chart(usersCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(243, 156, 18, 0.7)',
+                            'rgba(231, 76, 60, 0.7)',
+                            'rgba(155, 89, 182, 0.7)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        // Update units table
+        function updateUnitsTable(units) {
+            const tbody = document.getElementById('units-table-body');
+            
+            if (!units || units.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No units found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = units.map(unit => `
+                <tr>
+                    <td>
+                        <strong>${unit.unit_name}</strong><br>
+                        <small class="text-muted">${unit.unit_code}</small>
+                    </td>
+                    <td>${unit.users_count}</td>
+                    <td>${unit.products_count}</td>
+                    <td>${unit.suppliers_count}</td>
+                    <td>
+                        <span class="badge ${unit.is_active ? 'bg-success' : 'bg-secondary'}">
+                            ${unit.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewUnit('${unit.unit_id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="editUnit('${unit.unit_id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Update units chart
+        function updateUnitsChart(units) {
+            if (!units || !unitsChart) return;
+            
+            unitsChart.data.labels = units.map(u => u.unit_code);
+            unitsChart.data.datasets[0].data = units.map(u => u.products_count);
+            unitsChart.data.datasets[1].data = units.map(u => u.suppliers_count);
+            unitsChart.update();
+        }
+        
+        // Update users chart
+        function updateUsersChart(userStats) {
+            if (!userStats || !usersChart) return;
+            
+            const roles = Object.keys(userStats.role_distribution);
+            const counts = Object.values(userStats.role_distribution);
+            
+            usersChart.data.labels = roles;
+            usersChart.data.datasets[0].data = counts;
+            usersChart.update();
+        }
+        
+        // Utility functions
+        function refreshData() {
+            loadDashboardData();
+        }
+        
+        function showError(message) {
+            // Create and show error alert
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '9999';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 5000);
+        }
+        
+        function logout() {
+            localStorage.removeItem('authToken');
+            window.location.href = '/login';
+        }
+        
+        function viewUnit(unitId) {
+            alert(`View unit: ${unitId}`);
+        }
+        
+        function editUnit(unitId) {
+            alert(`Edit unit: ${unitId}`);
+        }
+        
+        function loadPageContent(page) {
+            // This would load different page content
+            console.log(`Loading page: ${page}`);
+        }
+    </script>
+</body>
+</html>
