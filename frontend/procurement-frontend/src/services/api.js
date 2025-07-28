@@ -1,7 +1,8 @@
 // API Client for Procurement System
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8001'
+// Use environment variable or fallback to relative URL for integrated deployment
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 // Create axios instance
 const apiClient = axios.create({

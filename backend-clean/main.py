@@ -1,11 +1,14 @@
 """
 FastAPI Main Application
-Multi-tenant Hotel Procurement System
+Multi-tenant Hotel Procurement System - Integrated Frontend/Backend
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import time
+import os
+from pathlib import Path
 
 from app.core.config import settings
 from app.api import auth, users, simple_data, products, suppliers, requisitions, units
@@ -144,6 +147,29 @@ async def api_auth_me():
     from fastapi import Request
     from fastapi.responses import RedirectResponse
     return RedirectResponse(url="/auth/me")
+
+# Static files configuration for integrated frontend
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/assets", StaticFiles(directory=str(static_dir / "assets")), name="assets")
+    
+    # Serve frontend application
+    @app.get("/{path:path}")
+    async def serve_frontend(path: str):
+        """Serve frontend files, fallback to index.html for SPA routing"""
+        if path.startswith("api/") or path.startswith("docs") or path.startswith("redoc"):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+        
+        file_path = static_dir / path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(file_path)
+        
+        # Fallback to index.html for SPA routing
+        index_path = static_dir / "index.html"
+        if index_path.exists():
+            return FileResponse(index_path)
+        
+        raise HTTPException(status_code=404, detail="Frontend not found")
 
 if __name__ == "__main__":
     import uvicorn

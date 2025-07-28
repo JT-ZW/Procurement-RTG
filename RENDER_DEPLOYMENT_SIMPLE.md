@@ -1,47 +1,53 @@
-# Simple Render Deployment Guide
+# Simple Render Deployment Guide - Single Integrated Web Service
 
-## Step 1: Deploy Database
+## Step 1: Prepare Supabase Database Connection
 
-1. Go to Render Dashboard
-2. Click "New" → "PostgreSQL"
-3. Settings:
-   - Name: procurement-db
-   - Database: procurement_system
-   - User: procurement_user
-   - Plan: Free
+Since you're already using Supabase, you'll use your existing database instead of creating a new one.
 
-## Step 2: Deploy Backend
+1. Go to your Supabase project dashboard
+2. Go to Settings → Database
+3. Copy your **Connection String** (it looks like):
+   ```
+   postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
+   ```
+
+## Step 2: Deploy Single Integrated Web Service
 
 1. Click "New" → "Web Service"
 2. Connect your GitHub repo: JT-ZW/Procurement-RTG
 3. Settings:
 
-   - Name: procurement-backend
+   - Name: procurement-system
    - Runtime: Python 3
    - Root Directory: backend-clean
-   - Build Command: pip install -r requirements.txt
+   - Build Command: pip install -r requirements.txt && cd ../frontend/procurement-frontend && npm ci && npm run build && mkdir -p ../backend-clean/static && cp -r dist/\* ../backend-clean/static/ && cd ../backend-clean
    - Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
 
 4. Environment Variables:
    ```
-   DATABASE_URL = [Copy from PostgreSQL service internal connection string]
+   DATABASE_URL = postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
    SECRET_KEY = your-super-secret-key-change-this
    ALGORITHM = HS256
    ACCESS_TOKEN_EXPIRE_MINUTES = 1440
    DEBUG = false
+   SUPABASE_URL = https://[YOUR-PROJECT-REF].supabase.co
+   SUPABASE_ANON_KEY = [Your Supabase Anon Key]
    ```
 
-## Step 3: Deploy Frontend
+## Step 3: Test Deployment
 
-1. Click "New" → "Web Service"
-2. Connect same GitHub repo: JT-ZW/Procurement-RTG
-3. Settings:
+1. Wait for service to deploy (10-15 minutes for initial build)
+2. Test backend API: https://procurement-system.onrender.com/docs
+3. Test frontend: https://procurement-system.onrender.com
+4. Login with: admin@hotel.com / password123
 
-   - Name: procurement-frontend
-   - Runtime: Node
-   - Root Directory: frontend/procurement-frontend
-   - Build Command: npm ci && npm run build
-   - Start Command: npm run preview -- --host 0.0.0.0 --port $PORT
+## Benefits of Single Service Deployment:
+
+- ✅ One URL for entire application
+- ✅ No CORS issues between frontend/backend
+- ✅ Easier to manage and maintain
+- ✅ Lower resource usage
+- ✅ Faster internal communication
 
 4. Environment Variables:
    ```
@@ -58,6 +64,28 @@
 ## Troubleshooting
 
 - Check service logs for errors
-- Verify DATABASE_URL is internal connection string
+- Verify DATABASE_URL points to your Supabase database
 - Ensure all environment variables are set
-- Frontend should use HTTPS backend URL
+- Frontend will be accessible at the same URL as backend
+- Test Supabase connection from your local environment first
+- Make sure your Supabase database has all the required tables and views
+- If build fails, check that both Python and Node.js dependencies install correctly
+
+## URL Structure for Single Service:
+
+- Frontend: https://procurement-system.onrender.com/
+- Backend API: https://procurement-system.onrender.com/api/v1/
+- API Documentation: https://procurement-system.onrender.com/docs
+- Login: admin@hotel.com / password123
+
+## Benefits of Single Integrated Service:
+
+- ✅ One URL for entire application
+- ✅ No CORS issues between frontend/backend
+- ✅ Easier to manage and maintain
+- ✅ Lower resource usage
+- ✅ Faster internal communication
+- ✅ Uses existing Supabase database
+- ✅ Persistent data (won't reset)
+- ✅ Better performance and reliability
+- ✅ Built-in auth system (can be integrated later)

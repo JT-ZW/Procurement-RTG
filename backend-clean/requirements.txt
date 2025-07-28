@@ -1,6 +1,6 @@
-# Core FastAPI and ASGI server
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
+# Core FastAPI and ASGI server - Updated to match working system
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
 
 # Database and ORM
 sqlalchemy==2.0.23
@@ -11,18 +11,18 @@ psycopg2-binary==2.9.9
 # Authentication and Security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
+python-multipart==0.0.20
 
-# Data validation and settings
-pydantic==2.5.0
-pydantic-settings==2.1.0
-pydantic[email]==2.5.0
+# Data validation and settings - Updated versions
+pydantic==2.11.5
+pydantic-settings==2.9.1
+pydantic-core==2.33.2
 
 # Environment and configuration
-python-dotenv==1.0.0
+python-dotenv==1.1.0
 
-# Production server
-gunicorn==21.2.0
+# JWT tokens
+PyJWT==2.10.1
 
 # Development tools (optional for production)
 pytest==7.4.3

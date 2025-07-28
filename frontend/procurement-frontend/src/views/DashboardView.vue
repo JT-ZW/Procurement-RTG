@@ -409,7 +409,8 @@ export default {
 
     const loadSuppliers = async () => {
       try {
-        const response = await fetch('http://localhost:8001/api/v1/suppliers', {
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+        const response = await fetch(`${API_BASE}/api/v1/suppliers`, {
           headers: {
             'Authorization': `Bearer ${authStore.token}`
           }
@@ -424,7 +425,8 @@ export default {
 
     const loadRequisitions = async () => {
       try {
-        const response = await fetch('http://localhost:8001/api/v1/purchase-requisitions', {
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+        const response = await fetch(`${API_BASE}/api/v1/purchase-requisitions`, {
           headers: {
             'Authorization': `Bearer ${authStore.token}`
           }
