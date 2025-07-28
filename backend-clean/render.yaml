@@ -1,0 +1,47 @@
+# Render Blueprint for Hotel Procurement System
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: procurement-db
+    runtime: docker
+    plan: free
+    
+  # Backend API Service
+  - type: web
+    name: procurement-backend
+    runtime: python
+    plan: free
+    repo: https://github.com/JT-ZW/Procurement-RTG.git
+    rootDir: backend-clean
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: procurement-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+      - key: DEBUG
+        value: "false"
+    
+  # Frontend Service  
+  - type: web
+    name: procurement-frontend
+    runtime: node
+    plan: free
+    repo: https://github.com/JT-ZW/Procurement-RTG.git
+    rootDir: frontend/procurement-frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run preview -- --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: procurement-backend
+          property: host

@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     # Application info
     APP_NAME: str = "Hotel Procurement System"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
+    DEBUG: bool = False  # Set to False for production
     
     # Database
     DATABASE_URL: str
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # Security
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours for production
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = [
@@ -31,6 +31,7 @@ class Settings(BaseSettings):
         "http://localhost:5174",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:8080",
+        "https://*.onrender.com",  # Allow Render domains
         "*"  # Allow all origins for development
     ]
     
