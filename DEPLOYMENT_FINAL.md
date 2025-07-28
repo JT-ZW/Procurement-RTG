@@ -8,6 +8,7 @@
 ✅ **Database Integration** - Supabase connection ready  
 ✅ **Build Process** - Combined frontend + backend build  
 ✅ **Single Service Setup** - No CORS issues, one URL
+✅ **Python Version** - Fixed to 3.11.9 for asyncpg compatibility
 
 ## 🚀 **Deployment Steps**
 
@@ -31,6 +32,7 @@ postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/pos
    ```
    Name: procurement-system
    Runtime: Python 3
+   Python Version: 3.11.9
    Root Directory: backend-clean
    Build Command: pip install -r requirements.txt && cd ../frontend/procurement-frontend && npm ci && npm run build && mkdir -p ../backend-clean/static && cp -r dist/* ../backend-clean/static/ && cd ../backend-clean
    Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
@@ -73,5 +75,30 @@ postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/pos
 - ✅ Database schema with 15 products ready
 - ✅ Frontend/backend integration complete
 - ✅ Single service deployment configured
+- ✅ Python 3.11.9 specified for asyncpg compatibility
+
+## 🔧 **Troubleshooting Build Issues**
+
+### **If asyncpg still fails to build:**
+
+1. **Option A: Use alternative requirements file**
+
+   - Rename `requirements.txt` to `requirements_async.txt`
+   - Rename `requirements_fallback.txt` to `requirements.txt`
+   - This uses synchronous database operations instead
+
+2. **Option B: Force Python 3.11**
+
+   - Ensure `runtime.txt` contains: `python-3.11.9`
+   - Clear Render cache and redeploy
+
+3. **Option C: Use older asyncpg version**
+   - The requirements.txt now uses `asyncpg==0.28.0` (more compatible)
+
+### **Common Build Errors:**
+
+- **asyncpg compilation error** → Use Python 3.11.9 or fallback requirements
+- **Node.js build fails** → Check frontend directory structure
+- **Database connection fails** → Verify Supabase connection string
 
 **Your Hotel Procurement E-catalogue System is ready to deploy! 🚀**

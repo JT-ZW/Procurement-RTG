@@ -2,11 +2,11 @@
 fastapi==0.115.12
 uvicorn[standard]==0.34.2
 
-# Database and ORM
+# Database and ORM - Keeping async setup with Python 3.11 compatibility
 sqlalchemy==2.0.23
-asyncpg==0.29.0
-alembic==1.12.1
+asyncpg==0.28.0
 psycopg2-binary==2.9.9
+alembic==1.12.1
 
 # Authentication and Security
 python-jose[cryptography]==3.3.0
