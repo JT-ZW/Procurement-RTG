@@ -1,4 +1,10 @@
-# Simple Render Deployment Guide - Single Integrated Web Service
+# Simple Render Dep - Name: procurement-system
+
+- Runtime: Python 3
+- Python Version: 3.11.9
+- Root Directory: backend-clean
+- Build Command: pip install -r requirements.txt
+- Start Command: uvicorn main_minimal:app --host 0.0.0.0 --port $PORTt Guide - Single Integrated Web Service
 
 ## Step 1: Prepare Supabase Database Connection
 
