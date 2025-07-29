@@ -6,7 +6,7 @@ from typing import Any, List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import AsyncSessionWrapper
 
 from app.core.config import settings
 from app.core.database import get_db
@@ -25,7 +25,7 @@ router = APIRouter()
 
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
     """OAuth2 compatible token login."""
@@ -65,7 +65,7 @@ async def login_for_access_token(
 @router.post("/login/json", response_model=Token)
 async def login_json(
     user_in: UserLogin,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSessionWrapper = Depends(get_db)
 ) -> Any:
     """JSON login endpoint for frontend applications."""
     user = await crud_user.authenticate(
@@ -103,7 +103,7 @@ async def login_json(
 @router.post("/register", response_model=UserResponse)
 async def register(
     user_in: UserCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSessionWrapper = Depends(get_db)
 ) -> Any:
     """Create new user - open registration."""
     try:

@@ -3,11 +3,10 @@ Products API endpoints for the Hotel Procurement System - Enhanced E-catalogue
 """
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from datetime import datetime
 
-from app.core.database import get_db
+from app.core.database import get_db, AsyncSessionWrapper
 from app.core.security import get_current_user
 from app.models.user import User
 from app.schemas.product import (
@@ -27,7 +26,7 @@ async def get_products(
     unit_id: Optional[str] = Query(None, description="Filter by unit ID"),
     stock_status: Optional[str] = Query(None, description="Filter by stock status"),
     search: Optional[str] = Query(None, description="Search in name, code, or description"),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get all products with E-catalogue information"""
@@ -106,7 +105,7 @@ async def get_e_catalogue(
     stock_status: Optional[str] = Query(None, regex="^(LOW_STOCK|REORDER_NEEDED|OVERSTOCK|NORMAL)$"),
     low_stock_only: bool = Query(False, description="Show only products with low stock"),
     search: Optional[str] = Query(None),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get E-catalogue view with all required fields and calculations"""
@@ -183,7 +182,7 @@ async def get_e_catalogue(
 
 @router.get("/categories/", response_model=List[ProductCategory])
 async def get_product_categories(
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get all product categories"""
@@ -215,7 +214,7 @@ async def get_product_categories(
 @router.post("/categories/", response_model=ProductCategory, status_code=status.HTTP_201_CREATED)
 async def create_product_category(
     category: ProductCategoryCreate,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Create a new product category"""
@@ -264,7 +263,7 @@ async def create_product_category(
 @router.get("/{product_id}", response_model=ECatalogueProduct)
 async def get_product(
     product_id: UUID,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get a specific product by ID with all E-catalogue information"""
@@ -321,7 +320,7 @@ async def get_product(
 @router.post("/", response_model=ECatalogueProduct, status_code=status.HTTP_201_CREATED)
 async def create_product(
     product: ProductCreate,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Create a new product with all E-catalogue fields"""
@@ -393,7 +392,7 @@ async def create_product(
 async def update_product(
     product_id: UUID,
     product: ProductUpdate,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Update a product"""
@@ -441,7 +440,7 @@ async def update_product(
 async def update_product_stock(
     product_id: UUID,
     stock_update: StockUpdate,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Update product stock levels"""
@@ -483,7 +482,7 @@ async def update_product_stock(
 async def update_consumption_rate(
     product_id: UUID,
     consumption_update: ConsumptionRateUpdate,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Update product consumption rate"""
@@ -524,7 +523,7 @@ async def update_consumption_rate(
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product(
     product_id: UUID,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Soft delete a product (set is_active to false)"""

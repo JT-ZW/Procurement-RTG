@@ -1,11 +1,12 @@
 """
-Database Configuration and Session Management
+Database Configuration and Session Management - psycopg2 Compatibility
 """
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Generator
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
+import asyncio
+from functools import wraps
 
 from app.core.config import settings
 
@@ -21,67 +22,75 @@ convention = {
 metadata = MetaData(naming_convention=convention)
 Base = declarative_base(metadata=metadata)
 
-# Convert PostgreSQL URL for asyncpg
-def get_async_database_url():
-    """Convert sync database URL to async URL for asyncpg."""
-    if settings.DATABASE_URL.startswith("postgresql://"):
-        return settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
-    return settings.DATABASE_URL
-
-# Create async engine
-engine = create_async_engine(
-    get_async_database_url(),
-    echo=settings.DEBUG,
-    future=True
-)
-
-# Create async session factory
-AsyncSessionLocal = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autoflush=False,
-    autocommit=False
-)
-
-# Sync engine for migrations
-sync_engine = create_engine(
+# Create synchronous engine using psycopg2
+engine = create_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
-    future=True
+    pool_pre_ping=True,
+    pool_recycle=300
 )
 
-SyncSessionLocal = sessionmaker(
+# Create synchronous session factory
+SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
-    bind=sync_engine,
-    future=True
+    bind=engine
 )
 
-# Database session dependency
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """
-    Async database session dependency for FastAPI.
-    """
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+# Async compatibility wrapper
+class AsyncSessionWrapper:
+    """Wrapper to make sync session look like async session"""
+    def __init__(self, session: Session):
+        self._session = session
+    
+    async def execute(self, query, params=None):
+        """Execute query asynchronously (but actually sync)"""
+        return await asyncio.get_event_loop().run_in_executor(
+            None, lambda: self._session.execute(query, params or {})
+        )
+    
+    async def commit(self):
+        """Commit transaction"""
+        await asyncio.get_event_loop().run_in_executor(
+            None, self._session.commit
+        )
+    
+    async def rollback(self):
+        """Rollback transaction"""
+        await asyncio.get_event_loop().run_in_executor(
+            None, self._session.rollback
+        )
+    
+    async def close(self):
+        """Close session"""
+        await asyncio.get_event_loop().run_in_executor(
+            None, self._session.close
+        )
 
-# Synchronous database session dependency for simple operations
-def get_sync_db():
+# Database session dependency
+async def get_db() -> AsyncGenerator[AsyncSessionWrapper, None]:
+    """
+    Async-compatible database session dependency for FastAPI.
+    """
+    db = SessionLocal()
+    session_wrapper = AsyncSessionWrapper(db)
+    try:
+        yield session_wrapper
+        await session_wrapper.commit()
+    except Exception:
+        await session_wrapper.rollback()
+        raise
+    finally:
+        await session_wrapper.close()
+
+# Synchronous database session dependency  
+def get_sync_db() -> Generator[Session, None, None]:
     """
     Synchronous database session dependency for FastAPI.
     """
-    db = SyncSessionLocal()
+    db = SessionLocal()
     try:
         yield db
-        db.commit()
     except Exception:
         db.rollback()
         raise

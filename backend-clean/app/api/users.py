@@ -3,7 +3,7 @@ User Management API Routes
 """
 from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import AsyncSessionWrapper
 
 from app.core.database import get_db
 from app.core.security import get_current_user, get_current_active_superuser
@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[UserResponse])
 async def read_users(
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(get_current_active_superuser)
@@ -29,7 +29,7 @@ async def read_users(
 @router.post("/", response_model=UserResponse)
 async def create_user(
     user_in: UserCreate,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_active_superuser)
 ) -> Any:
     """Create new user (admin only)."""
@@ -46,7 +46,7 @@ async def create_user(
 @router.get("/{user_id}", response_model=UserResponse)
 async def read_user(
     user_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSessionWrapper = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ) -> Any:
     """Get user by ID."""

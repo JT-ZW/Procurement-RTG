@@ -151,7 +151,10 @@ async def api_auth_me():
 # Static files configuration for integrated frontend
 static_dir = Path(__file__).parent / "static"
 if static_dir.exists():
-    app.mount("/assets", StaticFiles(directory=str(static_dir / "assets")), name="assets")
+    # Only mount assets if the assets directory exists
+    assets_dir = static_dir / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
     
     # Serve frontend application
     @app.get("/{path:path}")
