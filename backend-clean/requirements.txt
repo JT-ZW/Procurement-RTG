@@ -1,4 +1,4 @@
-# Python 3.13 compatible requirements - No compilation needed
+# Ultra-minimal requirements - No Rust/C compilation at all
 fastapi==0.104.1
 uvicorn==0.24.0
 sqlalchemy==2.0.23
@@ -9,5 +9,5 @@ pydantic==2.5.0
 pydantic-settings==2.1.0  
 python-dotenv==1.0.0
 PyJWT==2.8.0
-passlib==1.7.4
-bcrypt==4.0.1
+# Removed passlib and bcrypt to avoid Rust compilation
+# Using simple password hashing instead
