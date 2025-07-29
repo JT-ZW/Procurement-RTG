@@ -80,26 +80,38 @@ postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/pos
 - ✅ **NEW: AsyncSession wrapper for seamless async support**
 - ✅ **NEW: Build errors resolved - no more asyncpg compilation issues**
 
-## 🔧 **Troubleshooting Build Issues - SOLVED**
+## 🔧 **Troubleshooting Build Issues - UPDATED SOLUTION**
 
-### **✅ Solution Implemented: psycopg2 Compatibility Layer**
+### **✅ Latest Solution: Avoid Rust Compilation**
 
-**Problem:** asyncpg fails to compile with Python 3.13 on Render build servers.
+**New Problem:** Rust/Cargo compilation errors on Render build servers (read-only filesystem).
 
-**Solution:** Updated system to use psycopg2 with async compatibility wrapper:
+**Updated Solution:**
 
-1. **Requirements updated** - Using `psycopg2-binary==2.9.9` instead of asyncpg
-2. **Database layer updated** - Created `AsyncSessionWrapper` for compatibility
-3. **API endpoints maintained** - No changes needed to existing async/await code
-4. **Full compatibility** - System works exactly the same, just different database driver
+1. **Requirements updated again** - Using older, pre-compiled versions that don't need Rust
+2. **Alternative minimal requirements** - `requirements_minimal.txt` available as backup
+3. **No cryptography compilation** - Using stable, binary-only packages
 
-### **Alternative Options (not needed now):**
+### **If build still fails, use minimal requirements:**
 
-1. **Option A: Use alternative requirements file**
+```bash
+# Rename current requirements and use minimal version
+mv requirements.txt requirements_full.txt
+mv requirements_minimal.txt requirements.txt
+```
 
-   - Rename `requirements.txt` to `requirements_async.txt`
-   - Rename `requirements_fallback.txt` to `requirements.txt`
-   - This uses synchronous database operations instead
+### **Previous Solutions (implemented):**
+
+1. **✅ psycopg2 Compatibility Layer** - Using `psycopg2-binary==2.9.9` instead of asyncpg
+2. **✅ Database layer updated** - Created `AsyncSessionWrapper` for compatibility
+3. **✅ API endpoints maintained** - No changes needed to existing async/await code
+4. **✅ Python version locked** - Using Python 3.11.9
+
+### **Alternative Options (not needed now):**1. **Option A: Use alternative requirements file**
+
+- Rename `requirements.txt` to `requirements_async.txt`
+- Rename `requirements_fallback.txt` to `requirements.txt`
+- This uses synchronous database operations instead
 
 2. **Option B: Force Python 3.11**
 
