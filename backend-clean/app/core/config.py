@@ -2,8 +2,7 @@
 Application Settings and Configuration
 """
 from typing import List
-from pydantic import BaseModel
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel, BaseSettings
 from functools import lru_cache
 
 

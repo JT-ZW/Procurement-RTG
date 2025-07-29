@@ -1,12 +1,12 @@
 """
-Database Configuration and Session Management - psycopg2 Compatibility
+Database Configuration and Session Management - SQLAlchemy 1.4 Compatible
 """
-from typing import AsyncGenerator, Generator
+from typing import Generator
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-import asyncio
-from functools import wraps
+import hashlib
+import secrets
 
 from app.core.config import settings
 
@@ -37,54 +37,8 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 
-# Async compatibility wrapper
-class AsyncSessionWrapper:
-    """Wrapper to make sync session look like async session"""
-    def __init__(self, session: Session):
-        self._session = session
-    
-    async def execute(self, query, params=None):
-        """Execute query asynchronously (but actually sync)"""
-        return await asyncio.get_event_loop().run_in_executor(
-            None, lambda: self._session.execute(query, params or {})
-        )
-    
-    async def commit(self):
-        """Commit transaction"""
-        await asyncio.get_event_loop().run_in_executor(
-            None, self._session.commit
-        )
-    
-    async def rollback(self):
-        """Rollback transaction"""
-        await asyncio.get_event_loop().run_in_executor(
-            None, self._session.rollback
-        )
-    
-    async def close(self):
-        """Close session"""
-        await asyncio.get_event_loop().run_in_executor(
-            None, self._session.close
-        )
-
-# Database session dependency
-async def get_db() -> AsyncGenerator[AsyncSessionWrapper, None]:
-    """
-    Async-compatible database session dependency for FastAPI.
-    """
-    db = SessionLocal()
-    session_wrapper = AsyncSessionWrapper(db)
-    try:
-        yield session_wrapper
-        await session_wrapper.commit()
-    except Exception:
-        await session_wrapper.rollback()
-        raise
-    finally:
-        await session_wrapper.close()
-
-# Synchronous database session dependency  
-def get_sync_db() -> Generator[Session, None, None]:
+# Simple synchronous database session dependency
+def get_db() -> Generator[Session, None, None]:
     """
     Synchronous database session dependency for FastAPI.
     """
