@@ -2,7 +2,7 @@
 Product schemas for the Hotel Procurement System - Enhanced E-catalogue
 """
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from uuid import UUID
 
@@ -36,15 +36,17 @@ class ProductBase(BaseModel):
     specifications: Optional[Dict[str, Any]] = Field(None, description="Additional product specifications")
     is_active: bool = Field(default=True, description="Product active status")
 
-    @validator('maximum_stock_level')
-    def validate_max_greater_than_min(cls, v, values):
-        if 'minimum_stock_level' in values and v <= values['minimum_stock_level']:
+    @field_validator('maximum_stock_level')
+    @classmethod
+    def validate_max_greater_than_min(cls, v, info):
+        if hasattr(info, 'data') and 'minimum_stock_level' in info.data and v <= info.data['minimum_stock_level']:
             raise ValueError('Maximum stock level must be greater than minimum stock level')
         return v
 
-    @validator('reorder_point')
-    def validate_reorder_point(cls, v, values):
-        if 'minimum_stock_level' in values and v < values['minimum_stock_level']:
+    @field_validator('reorder_point') 
+    @classmethod
+    def validate_reorder_point(cls, v, info):
+        if hasattr(info, 'data') and 'minimum_stock_level' in info.data and v < info.data['minimum_stock_level']:
             raise ValueError('Reorder point should not be less than minimum stock level')
         return v
 
