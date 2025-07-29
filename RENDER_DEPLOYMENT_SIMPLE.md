@@ -19,8 +19,9 @@ Since you're already using Supabase, you'll use your existing database instead o
 
    - Name: procurement-system
    - Runtime: Python 3
+   - Python Version: 3.11.9
    - Root Directory: backend-clean
-   - Build Command: pip install -r requirements.txt && cd ../frontend/procurement-frontend && npm ci && npm run build && mkdir -p ../backend-clean/static && cp -r dist/\* ../backend-clean/static/ && cd ../backend-clean
+   - Build Command: pip install -r requirements.txt && cd ../frontend/procurement-frontend && npm ci && npm run build && mkdir -p ../../backend-clean/static && cp -r dist/\* ../../backend-clean/static/ && cd ../../backend-clean
    - Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
 
 4. Environment Variables:
